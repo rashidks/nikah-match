@@ -1,8 +1,10 @@
 from pathlib import Path
+import os
+import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = "change-me-in-production"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
+DEBUG = os.environ.get("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
@@ -26,21 +28,31 @@ TEMPLATES = [{
         "django.contrib.messages.context_processors.messages"]},
 }]
 WSGI_APPLICATION = "config.wsgi.application"
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "nikah_match",
-        "USER": "mohamedrashid",
-        "PASSWORD": "",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.config(
+        default="postgresql://mohamedrashid@localhost:5432/nikah_match"
+    )
 }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "nikah_match",
+#         "USER": "mohamedrashid",
+#         "PASSWORD": "",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     }
+# }
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-CORS_ALLOW_ALL_ORIGINS = True  # restrict in production
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5173"
+).split(",")
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
